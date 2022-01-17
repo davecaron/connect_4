@@ -1,6 +1,5 @@
-import connect_4 as con
-import connect_4_UI
-import connect_4_UI as conUI
+import logic.connect_4 as con
+import UI_basic.connect_4_UI as conUI
 
 
 if __name__ == '__main__':
