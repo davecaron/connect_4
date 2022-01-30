@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class PlayerId(Enum):
-    INVALID_PLAYER = -1
+    NO_PLAYER = -1
     PLAYER1 = 0
     PLAYER2 = 1
 
@@ -21,7 +21,7 @@ class connect4Game:
         self.player0board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.board = np.zeros((self.nb_of_line, self.nb_of_column))
-        self.winning_player = PlayerId.INVALID_PLAYER.value
+        self.winning_player = PlayerId.NO_PLAYER.value
         self._current_player = PlayerId.PLAYER1.value
         self.last_move_i = -1
         self.last_move_j = -1
@@ -31,7 +31,7 @@ class connect4Game:
         self.check_for_player_win(PlayerId.PLAYER2.value, self.player1board)
 
     def isFinished(self):
-        return self.winning_player != PlayerId.INVALID_PLAYER.value
+        return self.winning_player != PlayerId.NO_PLAYER.value
 
     def getWinningPlayerId(self):
         return self.winning_player
