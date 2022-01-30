@@ -1,22 +1,27 @@
-import logic.connect_4 as con
-import UI_basic.connect_4_UI as conUI
+from managers.threadsManager import ThreadsManager
+from gui.mainWindow import MainWindow
+from PyQt6.QtWidgets import QApplication
 
 
-if __name__ == '__main__':
-
+def main():
     print("Main Running")
 
-    gameUI = conUI.connect4UI(mode="human")
+    threadsManager = ThreadsManager()
 
+    threadsManager.createThreads()
+    threadsManager.startThreads()
 
-    while True:
-        gameUI.update()
-        gameUI.check_event()
+    app = QApplication([])
 
+    window = MainWindow()
+    window.show()
 
+    app.exec()
 
-
+    threadsManager.stopThreads()
 
     print("Main Finished")
 
 
+if __name__ == '__main__':
+    main()
