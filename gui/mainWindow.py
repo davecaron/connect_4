@@ -1,42 +1,56 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout
+
+from gui.opponentsChoiceWidget import OpponentsChoiceWidget
+from gui.gameWidget import GameWidget
+from gui.guiCommon import OpponentType
 from version.versionDefines import getNameAndVersion
 
 
 class MainWindow(QMainWindow):
-    DEFAULT_WIDTH_PX = 600
-    DEFAULT_HEIGHT_PX = 400
 
     def __init__(self):
         super().__init__()
+        self.opponentType = OpponentType.Invalid.value
+        self.verticalLayout = QVBoxLayout()
+        self.opponentsWidget = None
+        self.gameWidget = None
 
-        self.__initMainWindow()
-        self.__addMenuButtons()
+        self.__initWindow()
+        self.__addOpponentsChoiceWidget()
 
-    def __initMainWindow(self):
+    def __initWindow(self):
         nameAndVersion = getNameAndVersion()
         self.setWindowTitle(nameAndVersion)
-        self.resize(self.DEFAULT_WIDTH_PX, self.DEFAULT_HEIGHT_PX)
-        self.menuWidget = QWidget()
 
-    def __addMenuButtons(self):
-        verticalLayout = QVBoxLayout()
-        horizontalLayout = QHBoxLayout()
-        horizontalLayout.addStretch(1)
+    def __addOpponentsChoiceWidget(self):
+        self.opponentsWidget = OpponentsChoiceWidget()
+        self.opponentsWidget.opponentTypeSignal.connect(self.receiveOpponentType)
+        self.opponentsWidget.closeRequestSignal.connect(self.receiveCloseRequest)
 
-        playButton = QPushButton("Play", self)
-        playButton.clicked.connect(self.__play)
-        horizontalLayout.addWidget(playButton)
+        self.verticalLayout.addWidget(self.opponentsWidget)
+        self.setLayout(self.verticalLayout)
 
-        quitButton = QPushButton("Quit", self)
-        quitButton.clicked.connect(self.__quit)
-        horizontalLayout.addWidget(quitButton)
+        self.setCentralWidget(self.opponentsWidget)
 
-        verticalLayout.addLayout(horizontalLayout)
-        self.menuWidget.setLayout(verticalLayout)
-        self.setCentralWidget(self.menuWidget)
+    def receiveOpponentType(self, opponentType):
+        self.opponentType = opponentType
 
-    def __play(self):
-        print("play")
+        self.opponentsWidget.close()
+        self.opponentsWidget.destroy()
 
-    def __quit(self):
+        self.__addGameWidget()
+
+    def __addGameWidget(self):
+        self.gameWidget = GameWidget(self.opponentType)
+
+        self.verticalLayout.addWidget(self.gameWidget)
+        self.setLayout(self.verticalLayout)
+
+        self.setCentralWidget(self.gameWidget)
+
+    def receiveCloseRequest(self):
         self.close()
+
+
+if __name__ == "__main__":
+    print("mainWindow")
