@@ -8,25 +8,25 @@ class GameManager(threading.Thread):
 
     def __init__(self):
         super().__init__()
-        self.game = connect4Game()
-        self.winningPlayer = PlayerId.NO_PLAYER.value
-        self.stopFlag = threading.Event()
+        self._game = connect4Game()
+        self._winningPlayer = PlayerId.NO_PLAYER.value
+        self._stopFlag = threading.Event()
 
     def run(self):
         while not self.__isStopped():
 
-            self.game.update()
+            self._game.update()
 
-            if self.game.isFinished():
-                self.winningPlayer = self.game.getWinningPlayerId()
+            if self._game.isFinished():
+                self._winningPlayer = self._game.getWinningPlayerId()
 
             sleep(self.SLEEPING_TIME_SEC)
 
     def stop(self):
-        self.stopFlag.set()
+        self._stopFlag.set()
 
     def __isStopped(self):
-        return self.stopFlag.is_set()
+        return self._stopFlag.is_set()
 
 
 if __name__ == "__main__":
