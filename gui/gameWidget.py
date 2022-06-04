@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from PyQt6.QtCore import Qt
 
 from gui.guiCommon import getOpponentName, setLabelFontSize, LabelAlignFlag
+from defines.gameDefines import OpponentType
 
 
 class GameWidget(QWidget):
@@ -9,7 +10,7 @@ class GameWidget(QWidget):
     DEFAULT_WIDTH_PX = 1200
     DEFAULT_HEIGHT_PX = 800
 
-    def __init__(self, opponentType):
+    def __init__(self, opponentType: OpponentType):
         super().__init__()
         self.resize(self.DEFAULT_WIDTH_PX, self.DEFAULT_HEIGHT_PX)
 
