@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from gui.guiCommon import setLabelFontSize, LabelAlignFlag, OpponentType
+from gui.guiCommon import setLabelFontSize, LabelAlignFlag
+from defines.gameDefines import OpponentType
 
 
 class OpponentsChoiceWidget(QWidget):
@@ -33,11 +34,11 @@ class OpponentsChoiceWidget(QWidget):
         opponentButtonsLayout = QHBoxLayout()
 
         humanButton = QPushButton("Human", self)
-        humanButton.clicked.connect(lambda opponentType: self.__sendOpponentTypeSignal(opponentType=OpponentType.Human.value))
+        humanButton.clicked.connect(lambda opponentType: self.__sendOpponentTypeSignal(opponentType=OpponentType.HUMAN))
         opponentButtonsLayout.addWidget(humanButton)
 
         aiButton = QPushButton("AI", self)
-        aiButton.clicked.connect(lambda opponentType: self.__sendOpponentTypeSignal(opponentType=OpponentType.Ai.value))
+        aiButton.clicked.connect(lambda opponentType: self.__sendOpponentTypeSignal(opponentType=OpponentType.AI))
         opponentButtonsLayout.addWidget(aiButton)
 
         self.verticalLayout.addLayout(opponentButtonsLayout)
@@ -52,7 +53,7 @@ class OpponentsChoiceWidget(QWidget):
         self.setLayout(self.verticalLayout)
         self.resize(self.DEFAULT_WIDTH_PX, self.DEFAULT_HEIGHT_PX)
 
-    def __sendOpponentTypeSignal(self, opponentType):
+    def __sendOpponentTypeSignal(self, opponentType: OpponentType):
         self.opponentTypeSignal.emit(opponentType)
 
     def __sendCloseRequest(self):
