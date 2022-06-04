@@ -1,28 +1,19 @@
 import numpy as np
-from enum import Enum
-
-
-class PlayerId(Enum):
-    NO_PLAYER = -1
-    PLAYER1 = 0
-    PLAYER2 = 1
+from gameData import GameData
+from defines.gameDefines import PlayerId
 
 
 class connect4Game:
-    DEFAULT_NUMBER_COLUMNS = 7
-    DEFAULT_NUMBER_LINES = 6
-    DEFAULT_NUMBER_PIECES_TO_WIN = 4
 
-    def __init__(self, nb_of_column=DEFAULT_NUMBER_COLUMNS, nb_of_line=DEFAULT_NUMBER_LINES,
-                 _numberPiecesToWin=DEFAULT_NUMBER_PIECES_TO_WIN):
-        self.nb_of_column = nb_of_column
-        self.nb_of_line = nb_of_line
-        self.numberPiecesToWin = _numberPiecesToWin
+    def __init__(self, gameData: GameData):
+        self.nb_of_column = gameData.numberColumns
+        self.nb_of_line = gameData.numberLines
+        self.numberPiecesToWin = gameData.numberPiecesToWin
         self.player0board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.board = np.zeros((self.nb_of_line, self.nb_of_column))
-        self.winning_player = PlayerId.NO_PLAYER.value
-        self._current_player = PlayerId.PLAYER1.value
+        self.winning_player = PlayerId.NO_PLAYER
+        self._current_player = PlayerId.PLAYER1
         self.last_move_i = -1
         self.last_move_j = -1
 
@@ -30,13 +21,13 @@ class connect4Game:
         self.check_for_player_win(PlayerId.PLAYER1.value, self.player0board)
         self.check_for_player_win(PlayerId.PLAYER2.value, self.player1board)
 
-    def isFinished(self):
-        return self.winning_player != PlayerId.NO_PLAYER.value
+    def isFinished(self) -> bool:
+        return self.winning_player != PlayerId.NO_PLAYER
 
-    def getWinningPlayerId(self):
+    def getWinningPlayerId(self) -> PlayerId:
         return self.winning_player
 
-    def check_for_player_win(self, player, board):
+    def check_for_player_win(self, player, board) -> bool:
 
         # horizontal lines
         for i in range(self.nb_of_line):
@@ -134,19 +125,19 @@ class connect4Game:
         self.player0board = np.zeros((self.nb_of_line, self.nb_of_column))
 
     def __changeCurrentPlayer(self):
-        if self._current_player == PlayerId.PLAYER1.value:
-            self._current_player = PlayerId.PLAYER2.value
-        elif self._current_player == PlayerId.PLAYER2.value:
-            self._current_player = PlayerId.PLAYER1.value
+        if self._current_player == PlayerId.PLAYER1:
+            self._current_player = PlayerId.PLAYER2
+        elif self._current_player == PlayerId.PLAYER2:
+            self._current_player = PlayerId.PLAYER1
         else:
             print("Invalid player current player")
 
-    def __getPlayerBoard(self, playerId):
+    def __getPlayerBoard(self, playerId : PlayerId):
         board = None
 
-        if playerId == PlayerId.PLAYER1.value:
+        if playerId == PlayerId.PLAYER1:
             board = self.player0board
-        elif playerId == PlayerId.PLAYER2.value:
+        elif playerId == PlayerId.PLAYER2:
             board = self.player1board
         else:
             print("Invalid player Id")
