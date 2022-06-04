@@ -1,16 +1,19 @@
+from queue import Queue
 from gameManager import GameManager
 
 
 class ThreadsManager:
 
-    def __init__(self):
+    def __init__(self, gameStateQueue: Queue, gameDataQueue: Queue):
         self._threads = []
+        self._gameStateQueue = gameStateQueue
+        self._gameDataQueue = gameDataQueue
 
     def createThreads(self):
         print("Creating thread %s" % GameManager.__name__)
-        thread = GameManager()
+        thread = GameManager(self._gameStateQueue, self._gameDataQueue)
         thread.daemon = True
-        print("Thread created")
+        print("Thread %s created" % GameManager.__name__)
         self._threads.append(thread)
 
     def startThreads(self):
