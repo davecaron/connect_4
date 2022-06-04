@@ -1,4 +1,5 @@
 from enum import Enum
+from defines.gameDefines import OpponentType
 
 
 class LabelAlignFlag(Enum):
@@ -14,18 +15,12 @@ class LabelAlignFlag(Enum):
     AlignBaseline = 0x0100
 
 
-class OpponentType(Enum):
-    Invalid = -1
-    Human = 0
-    Ai    = 1
-
-
-def getOpponentName(opponentType):
+def getOpponentName(opponentType: OpponentType) -> str:
     name = "Invalid"
 
-    if opponentType == OpponentType.Human.value:
+    if opponentType == OpponentType.HUMAN:
         name = "Human"
-    elif opponentType == OpponentType.Ai.value:
+    elif opponentType == OpponentType.AI:
         name = "Ai"
 
     return name
