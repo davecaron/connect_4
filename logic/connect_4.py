@@ -3,7 +3,7 @@ from gameData import GameData
 from defines.gameDefines import PlayerId
 
 
-class connect4Game:
+class Connect4Game:
 
     def __init__(self, gameData: GameData):
         self.nb_of_column = gameData.numberColumns
