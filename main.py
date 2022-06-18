@@ -1,5 +1,5 @@
 from queue import Queue
-from managers.threadsManager import ThreadsManager
+from managers.gameManager import GameManager
 from gui.mainWindow import MainWindow
 from PyQt6.QtWidgets import QApplication
 
@@ -7,24 +7,24 @@ from PyQt6.QtWidgets import QApplication
 def main():
     print("Main Running")
 
-    gameStateQueue = Queue()
-    gameDataQueue = Queue()
+    modelQueue = Queue()
+    uiQueue = Queue()
 
-    threadsManager = ThreadsManager(gameStateQueue, gameDataQueue)
-
-    threadsManager.createThreads()
-    threadsManager.startThreads()
+    gameManager = GameManager(modelQueue, uiQueue)
+    gameManager.start()
 
     app = QApplication([])
 
-    mainWindow = MainWindow(gameStateQueue, gameDataQueue)
+    mainWindow = MainWindow(modelQueue, uiQueue)
     mainWindow.show()
 
     app.exec()
 
-    gameStateQueue.join()
-    gameDataQueue.join()
-    threadsManager.stopThreads()
+    modelQueue.join()
+    uiQueue.join()
+
+    gameManager.stop()
+    gameManager.join()
 
     print("Main Finished")
 
