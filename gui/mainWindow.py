@@ -1,11 +1,14 @@
 from queue import Queue
-from _queue import Empty
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout
 from PyQt6.QtCore import QTimer
 
 from gui.opponentsChoiceWidget import OpponentsChoiceWidget
-from gui.gameWidget import GameWidget
+from gui.boardWidget import BoardWidget
+from communication.PacketProcessor import PacketProcessor
+from communication.GameCommunicator import GameCommunicator
+from factories.GamePacketFactory import GamePacketFactory as PacketFactory
 from logic.gameData import GameData
+from defines.commandDefines import GameCommands
 from defines.gameDefines import OpponentType
 from version.versionDefines import getNameAndVersion
 
@@ -14,20 +17,25 @@ class MainWindow(QMainWindow):
 
     GAME_STATE_TIMER_UPDATE_TIME_MS = 100
 
-    def __init__(self, gameStateQueue: Queue, gameDataQueue: Queue):
+    def __init__(self, modelQueue: Queue, uiQueue: Queue):
         super().__init__()
-        self._gameStateQueue = gameStateQueue
-        self._gameDataQueue = gameDataQueue
         self._gameData = GameData()
         self.verticalLayout = QVBoxLayout()
         self.opponentsWidget = None
-        self.gameWidget = None
+        self.boardWidget = None
+        self._commandsCallbackMap = {GameCommands.FINISH_GAME: self.finishGame}
+        self._packetProcessor = PacketProcessor(uiQueue, self._commandsCallbackMap)
+        self._modelCommunicator = GameCommunicator(modelQueue)
+
+        self.__initTimer()
+        self.__initWindow()
+
+        self.__addOpponentsChoiceWidget()
+
+    def __initTimer(self):
         self._gameStateTimer = QTimer()
         self._gameStateTimer.setInterval(self.GAME_STATE_TIMER_UPDATE_TIME_MS)
-        self._gameStateTimer.timeout.connect(self.checkGameState)
-
-        self.__initWindow()
-        self.__addOpponentsChoiceWidget()
+        self._gameStateTimer.timeout.connect(self.processGamePacket)
 
     def __initWindow(self):
         nameAndVersion = getNameAndVersion()
@@ -49,31 +57,34 @@ class MainWindow(QMainWindow):
         self.opponentsWidget.close()
         self.opponentsWidget.destroy()
 
-        self.__addGameWidget()
-        self.__updateGameDataQueue()
+        self.__addBoardWidget()
+        self.__startNewGame()
         self._gameStateTimer.start()
 
-    def __addGameWidget(self):
-        self.gameWidget = GameWidget(self._gameData.opponentType)
+    def __addBoardWidget(self):
+        self.boardWidget = BoardWidget(self._gameData, self.sendPlayerMove)
 
-        self.verticalLayout.addWidget(self.gameWidget)
+        self.verticalLayout.addWidget(self.boardWidget)
         self.setLayout(self.verticalLayout)
 
-        self.setCentralWidget(self.gameWidget)
+        self.setCentralWidget(self.boardWidget)
+
+    def sendPlayerMove(self, playedColumn: int, playedRow: int):
+        gamePacket = PacketFactory.getPacket(command=GameCommands.ADD_PLAYER_MOVE, playedColumn=playedColumn, playedRow=playedRow)
+        self._modelCommunicator.addPacket(gamePacket)
 
     def receiveCloseRequest(self):
         self.close()
 
-    def __updateGameDataQueue(self):
-        self._gameDataQueue.put(self._gameData)
+    def processGamePacket(self):
+        self._packetProcessor.executeLastCommand()
 
-    def checkGameState(self):
-        if not self._gameStateQueue.empty():
-            try:
-                gameState = self._gameStateQueue.get_nowait()
-                self._gameStateQueue.task_done()
-            except Empty:
-                pass
+    def __startNewGame(self):
+        gamePacket = PacketFactory.getPacket(command=GameCommands.START_NEW_GAME, gameData=self._gameData)
+        self._modelCommunicator.addPacket(gamePacket)
+
+    def finishGame(self, packet):
+        pass
 
 
 if __name__ == "__main__":
