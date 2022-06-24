@@ -1,7 +1,9 @@
 from queue import Queue
-from managers.gameManager import GameManager
 from gui.mainWindow import MainWindow
 from PyQt6.QtWidgets import QApplication
+
+from managers.gameManager import GameManager
+from controller.gameController import GameController
 
 
 def main():
@@ -15,9 +17,12 @@ def main():
 
     app = QApplication([])
 
-    mainWindow = MainWindow(modelQueue, uiQueue)
+    gameController = GameController(modelQueue, uiQueue)
+
+    mainWindow = MainWindow(gameController)
     mainWindow.show()
 
+    gameController.start()
     app.exec()
 
     modelQueue.join()
@@ -25,6 +30,8 @@ def main():
 
     gameManager.stop()
     gameManager.join()
+    gameController.stop()
+    gameController.join()
 
     print("Main Finished")
 
