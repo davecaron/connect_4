@@ -2,8 +2,8 @@ from queue import Queue
 from threading import Thread, Event
 from time import sleep
 
-from factories.GamePacketFactory import GamePacketFactory as PacketFactory
-from logic.connect_4 import Connect4Game, PlayerId
+from factories.gamePacketBuilder import GamePacketBuilder as PacketBuilder
+from logic.connect_4 import Connect4Game
 from communication.PacketProcessor import PacketProcessor
 from communication.GameCommunicator import GameCommunicator
 from defines.commandDefines import GameCommands as Commands
@@ -18,22 +18,11 @@ class GameManager(Thread):
         self._game: Connect4Game = None
         self._isGameStarted = False
         self._isGameFinished = False
-        self._winningPlayer = PlayerId.NO_PLAYER
         self._stopFlag = Event()
-        self._commandsCallbackMap = {Commands.START_NEW_GAME: self.startNewGame,
-                                     Commands.ADD_PLAYER_MOVE: self.addPlayerMove}
+        self._commandsCallbackMap = {Commands.START_NEW_GAME: self._startNewGame,
+                                     Commands.ADD_PLAYER_MOVE: self._addPlayerMove}
         self._packetProcessor = PacketProcessor(modelQueue, self._commandsCallbackMap)
         self._uiCommunicator = GameCommunicator(uiQueue)
-
-    def run(self):
-        while not self.__isStopped():
-            self._packetProcessor.executeLastCommand()
-
-            if self._canUpdateGame():
-                self._game.update()
-                self._checkGameFinished()
-
-            sleep(self.SLEEPING_TIME_SEC)
 
     def _canUpdateGame(self) -> bool:
         canUpdateGame = self._isGameStarted
@@ -52,26 +41,38 @@ class GameManager(Thread):
     def _checkGameFinished(self):
         if self._game.isFinished():
             self._isGameFinished = True
-            self._winningPlayer = self._game.getWinningPlayerId()
-            gamePacket = PacketFactory.getPacket(command=Commands.FINISH_GAME, winningPlayer=self._winningPlayer)
+            winningPlayerId = self._game.getWinningPlayerId()
+            gamePacket = PacketBuilder.getPacket(command=Commands.FINISH_GAME, winningPlayerId=winningPlayerId)
             self._uiCommunicator.addPacket(gamePacket)
 
-    def stop(self):
-        self._stopFlag.set()
-
-    def __isStopped(self):
-        return self._stopFlag.is_set()
-
-    def startNewGame(self, packet: GamePacket):
+    def _startNewGame(self, packet: GamePacket):
         gameData = packet.gameData
         self._game = Connect4Game(gameData)
         self._isGameStarted = True
 
-    def addPlayerMove(self, packet: GamePacket):
+    def _addPlayerMove(self, packet: GamePacket):
         column = packet.playedColumn
-        row = packet.playedRow
+        currentPlayerId, playedRow = self._game.add_move_column(column)
 
-        self._game.add_move(column, row)
+        if playedRow != -1:
+            gamePacket = PacketBuilder.getPacket(command=Commands.ACK_ADD_PLAYER_MOVE, playedColumn=column, playedRow=playedRow, currentPlayerId=currentPlayerId)
+            self._uiCommunicator.addPacket(gamePacket)
+
+    def __isStopped(self):
+        return self._stopFlag.is_set()
+
+    def stop(self):
+        self._stopFlag.set()
+
+    def run(self):
+        while not self.__isStopped():
+            self._packetProcessor.executeLastCommand()
+
+            if self._canUpdateGame():
+                self._game.update()
+                self._checkGameFinished()
+
+            sleep(self.SLEEPING_TIME_SEC)
 
 
 if __name__ == "__main__":
