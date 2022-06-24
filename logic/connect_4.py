@@ -18,8 +18,8 @@ class Connect4Game:
         self.last_move_j = -1
 
     def update(self):
-        self.check_for_player_win(PlayerId.PLAYER1.value, self.player0board)
-        self.check_for_player_win(PlayerId.PLAYER2.value, self.player1board)
+        self.check_for_player_win(PlayerId.PLAYER1, self.player0board)
+        self.check_for_player_win(PlayerId.PLAYER2, self.player1board)
 
     def isFinished(self) -> bool:
         return self.winning_player != PlayerId.NO_PLAYER
@@ -28,7 +28,6 @@ class Connect4Game:
         return self.winning_player
 
     def check_for_player_win(self, player, board) -> bool:
-
         # horizontal lines
         for i in range(self.nb_of_line):
             for j in range(self.nb_of_column - (self.numberPiecesToWin - 1)):
@@ -79,46 +78,46 @@ class Connect4Game:
         return False
 
     def add_move(self, i, j):
-
         board = self.__getPlayerBoard(self._current_player)
 
         self.last_move_i = i
         self.last_move_j = j
         board[i, j] = 1
-        print("player 0 board: ")
-        print(self.player0board)
-        print("player 1 board: ")
-        print(self.player1board)
 
         self.__changeCurrentPlayer()
 
-    def add_move_column(self, player, j):
-        if player == 0:
+    def add_move_column(self, column: int) -> (PlayerId, int):
+        currentPlayerId = self._current_player
+        playedRow = -1
+
+        if self._current_player == PlayerId.PLAYER1:
             board = self.player0board
             opponent_board = self.player1board
-        elif player == 1:
+        elif self._current_player == PlayerId.PLAYER2:
             board = self.player1board
             opponent_board = self.player0board
         else:
             print("Invalid player choice")
-            return None
-        column_player = board[:, j]
-        column_opponent = opponent_board[:, j]
-        for i in range(5, -1, -1):
+            return PlayerId.NO_PLAYER, -1
+
+        column_player = board[:, column]
+        column_opponent = opponent_board[:, column]
+
+        for i in range(self.nb_of_line - 1, -1, -1):
             if column_player[i] == 1:
                 continue
             elif column_opponent[i] == 1:
                 continue
             else:
                 self.last_move_i = i
-                self.last_move_j = j
-                board[i, j] = 1
+                self.last_move_j = column
+                board[i, column] = 1
+                playedRow = i
                 break
 
-        print("player 1 board: ")
-        print(self.player0board)
-        print("player 2 board: ")
-        print(self.player1board)
+        self.__changeCurrentPlayer()
+
+        return currentPlayerId, playedRow
 
     def reset_boards(self):
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
