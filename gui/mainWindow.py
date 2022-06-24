@@ -1,90 +1,89 @@
-from queue import Queue
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout
-from PyQt6.QtCore import QTimer
 
 from gui.opponentsChoiceWidget import OpponentsChoiceWidget
 from gui.boardWidget import BoardWidget
-from communication.PacketProcessor import PacketProcessor
-from communication.GameCommunicator import GameCommunicator
-from factories.GamePacketFactory import GamePacketFactory as PacketFactory
+from controller.controllerABC import ControllerABC
+from factories.gamePacketBuilder import GamePacketBuilder as PacketBuilder
 from logic.gameData import GameData
 from defines.commandDefines import GameCommands
 from defines.gameDefines import OpponentType
+from defines.packetDefines import GamePacket
 from version.versionDefines import getNameAndVersion
 
 
 class MainWindow(QMainWindow):
 
-    GAME_STATE_TIMER_UPDATE_TIME_MS = 100
-
-    def __init__(self, modelQueue: Queue, uiQueue: Queue):
+    def __init__(self, controller: ControllerABC):
         super().__init__()
         self._gameData = GameData()
-        self.verticalLayout = QVBoxLayout()
-        self.opponentsWidget = None
-        self.boardWidget = None
-        self._commandsCallbackMap = {GameCommands.FINISH_GAME: self.finishGame}
-        self._packetProcessor = PacketProcessor(uiQueue, self._commandsCallbackMap)
-        self._modelCommunicator = GameCommunicator(modelQueue)
+        self._verticalLayout = QVBoxLayout()
+        self._opponentsWidget = None
+        self._boardWidget: BoardWidget = None
+        self._isGameFinished = False
+        self._commandsCallbackMap = {GameCommands.ACK_ADD_PLAYER_MOVE: self._ackAddPlayerMove,
+                                     GameCommands.FINISH_GAME: self._finishGame}
+        self._controller = controller
+        self._controller.setCommandsCallbackMap(self._commandsCallbackMap)
 
-        self.__initTimer()
         self.__initWindow()
-
         self.__addOpponentsChoiceWidget()
-
-    def __initTimer(self):
-        self._gameStateTimer = QTimer()
-        self._gameStateTimer.setInterval(self.GAME_STATE_TIMER_UPDATE_TIME_MS)
-        self._gameStateTimer.timeout.connect(self.processGamePacket)
 
     def __initWindow(self):
         nameAndVersion = getNameAndVersion()
         self.setWindowTitle(nameAndVersion)
 
     def __addOpponentsChoiceWidget(self):
-        self.opponentsWidget = OpponentsChoiceWidget()
-        self.opponentsWidget.opponentTypeSignal.connect(self.receiveOpponentType)
-        self.opponentsWidget.closeRequestSignal.connect(self.receiveCloseRequest)
+        self._opponentsWidget = OpponentsChoiceWidget()
+        self._opponentsWidget.opponentTypeSignal.connect(self.receiveOpponentType)
+        self._opponentsWidget.closeRequestSignal.connect(self.receiveCloseRequest)
 
-        self.verticalLayout.addWidget(self.opponentsWidget)
-        self.setLayout(self.verticalLayout)
+        self._verticalLayout.addWidget(self._opponentsWidget)
+        self.setLayout(self._verticalLayout)
 
-        self.setCentralWidget(self.opponentsWidget)
+        self.setCentralWidget(self._opponentsWidget)
+
+    def __addBoardWidget(self):
+        self._verticalLayout.setSpacing(0)
+
+        self._boardWidget = BoardWidget(self._gameData, self.sendPlayerMove)
+        self._verticalLayout.addWidget(self._boardWidget)
+
+        self.setCentralWidget(self._boardWidget)
+        self.setFixedSize(self._boardWidget.size())
+
+    def __startNewGame(self):
+        self._isGameFinished = False
+        gamePacket = PacketBuilder.getPacket(command=GameCommands.START_NEW_GAME, gameData=self._gameData)
+        self._controller.addPacketToSend(gamePacket)
 
     def receiveOpponentType(self, opponentType: OpponentType):
         self._gameData.opponentType = OpponentType(opponentType)
 
-        self.opponentsWidget.close()
-        self.opponentsWidget.destroy()
+        self._opponentsWidget.close()
+        self._opponentsWidget.destroy()
 
         self.__addBoardWidget()
         self.__startNewGame()
-        self._gameStateTimer.start()
-
-    def __addBoardWidget(self):
-        self.boardWidget = BoardWidget(self._gameData, self.sendPlayerMove)
-
-        self.verticalLayout.addWidget(self.boardWidget)
-        self.setLayout(self.verticalLayout)
-
-        self.setCentralWidget(self.boardWidget)
-
-    def sendPlayerMove(self, playedColumn: int, playedRow: int):
-        gamePacket = PacketFactory.getPacket(command=GameCommands.ADD_PLAYER_MOVE, playedColumn=playedColumn, playedRow=playedRow)
-        self._modelCommunicator.addPacket(gamePacket)
 
     def receiveCloseRequest(self):
         self.close()
 
-    def processGamePacket(self):
-        self._packetProcessor.executeLastCommand()
+    def sendPlayerMove(self, playedColumn: int):
+        if not self._isGameFinished:
+            gamePacket = PacketBuilder.getPacket(command=GameCommands.ADD_PLAYER_MOVE, playedColumn=playedColumn)
+            self._controller.addPacketToSend(gamePacket)
 
-    def __startNewGame(self):
-        gamePacket = PacketFactory.getPacket(command=GameCommands.START_NEW_GAME, gameData=self._gameData)
-        self._modelCommunicator.addPacket(gamePacket)
+    def _ackAddPlayerMove(self, packet: GamePacket):
+        currentPlayerId = packet.currentPlayerId
+        playedColumn = packet.playedColumn
+        playedRow = packet.playedRow
 
-    def finishGame(self, packet):
-        pass
+        if self._boardWidget is not None:
+            self._boardWidget.setTokenColor(currentPlayerId, playedColumn, playedRow)
+
+    def _finishGame(self, packet: GamePacket):
+        self._isGameFinished = True
+        winningPlayerId = packet.winningPlayerId
 
 
 if __name__ == "__main__":
