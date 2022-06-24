@@ -10,5 +10,6 @@ class GamePacket:
     gameData: GameData = GameData()
     playedColumn: int = -1
     playedRow: int = -1
+    currentPlayerId: PlayerId = PlayerId.NO_PLAYER
     gameFinished: bool = False
-    winningPlayer: PlayerId = PlayerId.NO_PLAYER
+    winningPlayerId: PlayerId = PlayerId.NO_PLAYER
