@@ -10,7 +10,7 @@ from defines.packetDefines import GamePacket
 
 class GameController(Thread, ControllerABC):
 
-    REFRESH_TIME_SEC = 0.02
+    REFRESH_TIME_SEC = 0.01
 
     def __init__(self, modelQueue: Queue, uiQueue: Queue):
         super().__init__()
