@@ -1,18 +1,20 @@
-from PyQt6.QtGui import QColor
-
-
-class CellDefines:
-    CELL_WIDTH_PX = 100
-    CELL_HEIGHT_PX = 100
-    BACKGROUND_COLOR = QColor(0, 162, 232)
-
-
-class TokenDefines:
-    EMPTY_COLOR = QColor(255, 255, 255)
-    PLAYER1_COLOR = QColor(0, 128, 255)
-    PLAYER2_COLOR = QColor(255, 53, 53)
 
 
 class BoardDefines:
-    X_MARGINS_PX = 10
-    Y_MARGINS_PX = 10
+    FINISHED_GAME_ALPHA = 150
+
+
+class CellDefines:
+    CELL_WIDTH_PX = 120
+    CELL_HEIGHT_PX = 120
+    BACKGROUND_COLOR = (1, 86, 176)
+    BACKGROUND_COLOR_STR = str(BACKGROUND_COLOR)
+
+
+class TokenDefines:
+    TOKEN_DIAMETER_PX = int(0.8 * CellDefines.CELL_WIDTH_PX)
+    EMPTY_COLOR = (255, 255, 255, 255)
+    PLAYER1_COLOR = (229, 214, 64, 255)
+    PLAYER2_COLOR = (191, 51, 63, 255)
+    PLAYABLE_TOKEN_ALPHA = 180
+    PLAYED_TOKEN_ALPHA = 255
