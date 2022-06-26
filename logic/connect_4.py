@@ -13,7 +13,7 @@ class Connect4Game:
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.winning_player = PlayerId.NO_PLAYER
-        self._current_player = PlayerId.PLAYER1
+        self._currentPlayerId = PlayerId.PLAYER1
         self.last_move_i = -1
         self.last_move_j = -1
 
@@ -26,6 +26,9 @@ class Connect4Game:
 
     def getWinningPlayerId(self) -> PlayerId:
         return self.winning_player
+
+    def getCurrentPlayerId(self) -> PlayerId:
+        return self._currentPlayerId
 
     def check_for_player_win(self, player, board) -> bool:
         # horizontal lines
@@ -78,7 +81,7 @@ class Connect4Game:
         return False
 
     def add_move(self, i, j):
-        board = self.__getPlayerBoard(self._current_player)
+        board = self.__getPlayerBoard(self._currentPlayerId)
 
         self.last_move_i = i
         self.last_move_j = j
@@ -87,13 +90,13 @@ class Connect4Game:
         self.__changeCurrentPlayer()
 
     def add_move_column(self, column: int) -> (PlayerId, int):
-        currentPlayerId = self._current_player
+        lastPlayerId = self._currentPlayerId
         playedRow = -1
 
-        if self._current_player == PlayerId.PLAYER1:
+        if self._currentPlayerId == PlayerId.PLAYER1:
             board = self.player0board
             opponent_board = self.player1board
-        elif self._current_player == PlayerId.PLAYER2:
+        elif self._currentPlayerId == PlayerId.PLAYER2:
             board = self.player1board
             opponent_board = self.player0board
         else:
@@ -117,17 +120,17 @@ class Connect4Game:
 
         self.__changeCurrentPlayer()
 
-        return currentPlayerId, playedRow
+        return lastPlayerId, playedRow
 
     def reset_boards(self):
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.player0board = np.zeros((self.nb_of_line, self.nb_of_column))
 
     def __changeCurrentPlayer(self):
-        if self._current_player == PlayerId.PLAYER1:
-            self._current_player = PlayerId.PLAYER2
-        elif self._current_player == PlayerId.PLAYER2:
-            self._current_player = PlayerId.PLAYER1
+        if self._currentPlayerId == PlayerId.PLAYER1:
+            self._currentPlayerId = PlayerId.PLAYER2
+        elif self._currentPlayerId == PlayerId.PLAYER2:
+            self._currentPlayerId = PlayerId.PLAYER1
         else:
             print("Invalid player current player")
 
