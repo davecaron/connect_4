@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QMainWindow, QVBoxLayout
 from gui.opponentsChoiceWidget import OpponentsChoiceWidget
 from gui.boardWidget import BoardWidget
 from controller.controllerABC import ControllerABC
-from factories.gamePacketBuilder import GamePacketBuilder as PacketBuilder
+from factories.packetBuilder import PacketBuilder
 from logic.gameData import GameData
 from defines.commandDefines import GameCommands
 from defines.gameDefines import OpponentType
@@ -13,7 +13,7 @@ from version.versionDefines import getNameAndVersion
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, controller: ControllerABC):
+    def __init__(self, controller: ControllerABC, packetBuilder: PacketBuilder):
         super().__init__()
         self._gameData = GameData()
         self._verticalLayout = QVBoxLayout()
@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
                                      GameCommands.FINISH_GAME: self._finishGame}
         self._controller = controller
         self._controller.setCommandsCallbackMap(self._commandsCallbackMap)
+        self._packetBuilder = packetBuilder
 
         self.__initWindow()
         self.__addOpponentsChoiceWidget()
@@ -53,7 +54,7 @@ class MainWindow(QMainWindow):
 
     def __startNewGame(self):
         self._isGameFinished = False
-        gamePacket = PacketBuilder.getPacket(command=GameCommands.START_NEW_GAME, gameData=self._gameData)
+        gamePacket = self._packetBuilder.getPacket(command=GameCommands.START_NEW_GAME, gameData=self._gameData)
         self._controller.addPacketToSend(gamePacket)
 
     def receiveOpponentType(self, opponentType: OpponentType):
@@ -70,20 +71,16 @@ class MainWindow(QMainWindow):
 
     def sendPlayerMove(self, playedColumn: int):
         if not self._isGameFinished:
-            gamePacket = PacketBuilder.getPacket(command=GameCommands.ADD_PLAYER_MOVE, playedColumn=playedColumn)
+            gamePacket = self._packetBuilder.getPacket(command=GameCommands.ADD_PLAYER_MOVE, playedColumn=playedColumn)
             self._controller.addPacketToSend(gamePacket)
 
     def _ackAddPlayerMove(self, packet: GamePacket):
-        currentPlayerId = packet.currentPlayerId
-        playedColumn = packet.playedColumn
-        playedRow = packet.playedRow
-
         if self._boardWidget is not None:
-            self._boardWidget.setTokenColor(currentPlayerId, playedColumn, playedRow)
+            self._boardWidget.addPlayerMove(packet)
 
     def _finishGame(self, packet: GamePacket):
         self._isGameFinished = True
-        winningPlayerId = packet.winningPlayerId
+        self._boardWidget.finishGame(packet)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Thread, Event
 from time import sleep
 
-from factories.gamePacketBuilder import GamePacketBuilder as PacketBuilder
+from factories.packetBuilder import PacketBuilder
 from logic.connect_4 import Connect4Game
 from communication.PacketProcessor import PacketProcessor
 from communication.GameCommunicator import GameCommunicator
@@ -11,9 +11,9 @@ from defines.packetDefines import GamePacket
 
 
 class GameManager(Thread):
-    SLEEPING_TIME_SEC = 0.1
+    SLEEPING_TIME_SEC = 0.01
 
-    def __init__(self, modelQueue: Queue, uiQueue: Queue):
+    def __init__(self, modelQueue: Queue, uiQueue: Queue, packetBuilder: PacketBuilder):
         super().__init__()
         self._game: Connect4Game = None
         self._isGameStarted = False
@@ -23,6 +23,7 @@ class GameManager(Thread):
                                      Commands.ADD_PLAYER_MOVE: self._addPlayerMove}
         self._packetProcessor = PacketProcessor(modelQueue, self._commandsCallbackMap)
         self._uiCommunicator = GameCommunicator(uiQueue)
+        self._packetBuilder = packetBuilder
 
     def _canUpdateGame(self) -> bool:
         canUpdateGame = self._isGameStarted
@@ -42,7 +43,7 @@ class GameManager(Thread):
         if self._game.isFinished():
             self._isGameFinished = True
             winningPlayerId = self._game.getWinningPlayerId()
-            gamePacket = PacketBuilder.getPacket(command=Commands.FINISH_GAME, winningPlayerId=winningPlayerId)
+            gamePacket = self._packetBuilder.getPacket(command=Commands.FINISH_GAME, winningPlayerId=winningPlayerId)
             self._uiCommunicator.addPacket(gamePacket)
 
     def _startNewGame(self, packet: GamePacket):
@@ -52,10 +53,15 @@ class GameManager(Thread):
 
     def _addPlayerMove(self, packet: GamePacket):
         column = packet.playedColumn
-        currentPlayerId, playedRow = self._game.add_move_column(column)
+        lastPlayerId, playedRow = self._game.add_move_column(column)
+        currentPlayerId = self._game.getCurrentPlayerId()
 
         if playedRow != -1:
-            gamePacket = PacketBuilder.getPacket(command=Commands.ACK_ADD_PLAYER_MOVE, playedColumn=column, playedRow=playedRow, currentPlayerId=currentPlayerId)
+            gamePacket = self._packetBuilder.getPacket(command=Commands.ACK_ADD_PLAYER_MOVE,
+                                                       playedColumn=column,
+                                                       playedRow=playedRow,
+                                                       lastPlayerId=lastPlayerId,
+                                                       currentPlayerId=currentPlayerId)
             self._uiCommunicator.addPacket(gamePacket)
 
     def __isStopped(self):

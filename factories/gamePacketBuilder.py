@@ -1,13 +1,24 @@
-from logic.gameData import GameData
-from defines.commandDefines import GameCommands
+from factories.packetBuilder import PacketBuilder
+import dataclasses
 from defines.packetDefines import GamePacket
-from defines.gameDefines import PlayerId
 
 
-class GamePacketBuilder:
+class GamePacketBuilder(PacketBuilder):
 
-    @staticmethod
-    def getPacket(command: GameCommands = None, gameData: GameData = None, playedColumn: int = -1, playedRow: int = -1,
-                  gameFinished=False, currentPlayerId: PlayerId = PlayerId.NO_PLAYER, winningPlayerId: PlayerId = PlayerId.NO_PLAYER) -> GamePacket:
-        return GamePacket(command=command, gameData=gameData, playedColumn=playedColumn, playedRow=playedRow,
-                          currentPlayerId=currentPlayerId, gameFinished=gameFinished, winningPlayerId=winningPlayerId)
+    def __init__(self):
+        super().__init__()
+
+    def getPacket(self, **arguments):
+        validArguments = self._getValidArguments(**arguments)
+
+        return GamePacket(**validArguments)
+
+    def _getValidArguments(self, **arguments):
+        gamePacketDict = dataclasses.asdict(GamePacket())
+        validArguments = dict()
+
+        for argument, value in arguments.items():
+            if argument in gamePacketDict:
+                validArguments[argument] = value
+
+        return validArguments

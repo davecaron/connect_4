@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QApplication
 
 from managers.gameManager import GameManager
 from controller.gameController import GameController
+from factories.gamePacketBuilder import GamePacketBuilder
 
 
 def main():
@@ -12,14 +13,16 @@ def main():
     modelQueue = Queue()
     uiQueue = Queue()
 
-    gameManager = GameManager(modelQueue, uiQueue)
+    gamePacketBuilder = GamePacketBuilder()
+    gameManager = GameManager(modelQueue, uiQueue, gamePacketBuilder)
     gameManager.start()
 
     app = QApplication([])
 
     gameController = GameController(modelQueue, uiQueue)
+    gamePacketBuilder = GamePacketBuilder()
 
-    mainWindow = MainWindow(gameController)
+    mainWindow = MainWindow(gameController, gamePacketBuilder)
     mainWindow.show()
 
     gameController.start()
