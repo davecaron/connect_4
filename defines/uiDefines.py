@@ -1,7 +1,7 @@
 
 
 class BoardDefines:
-    FINISHED_GAME_ALPHA = 150
+    FINISHED_GAME_ALPHA = 140
 
 
 class CellDefines:
@@ -12,9 +12,9 @@ class CellDefines:
 
 
 class TokenDefines:
-    TOKEN_DIAMETER_PX = int(0.8 * CellDefines.CELL_WIDTH_PX)
-    EMPTY_COLOR = (255, 255, 255, 255)
+    TOKEN_DIAMETER_PX = int(0.85 * CellDefines.CELL_WIDTH_PX)
+    EMPTY_COLOR = (1, 61, 126, 255)
     PLAYER1_COLOR = (229, 214, 64, 255)
-    PLAYER2_COLOR = (191, 51, 63, 255)
-    PLAYABLE_TOKEN_ALPHA = 180
+    PLAYER2_COLOR = (235, 7, 7, 255)
+    PLAYABLE_TOKEN_ALPHA = 160
     PLAYED_TOKEN_ALPHA = 255

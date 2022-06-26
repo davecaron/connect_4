@@ -36,7 +36,8 @@ class CellWidget(QLabel):
     def setAlpha(self, alpha: int):
         self._currentColor.setAlpha(alpha)
         self._backgroundColor.setAlpha(alpha)
-        self.setStyleSheet(f"background-color:rgba({CellDefines.BACKGROUND_COLOR_STR}, {alpha})")
+        (r, g, b, _) = self._backgroundColor.getRgb()
+        self.setStyleSheet(f"background-color:rgba({r}, {g}, {b}, {alpha})")
 
     def mouseReleaseEvent(self, ev: QMouseEvent) -> None:
         self.mouseReleasedSignal.emit()
