@@ -1,3 +1,5 @@
+from PyQt6.QtGui import QColor
+
 from enum import Enum
 from defines.gameDefines import OpponentType
 
@@ -32,5 +34,17 @@ def setLabelFontSize(widget, fontSize):
     widget.setFont(labelFont)
 
 
-if __name__ == "__main__":
-    print("guiCommon")
+def getQColor(rgba: tuple):
+    color = QColor()
+
+    if len(rgba) > 2:
+        r = rgba[0]
+        g = rgba[1]
+        b = rgba[2]
+        color.setRgb(r, g, b)
+
+    if len(rgba) > 3:
+        alpha = rgba[3]
+        color.setAlpha(alpha)
+
+    return color
