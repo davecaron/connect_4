@@ -3,7 +3,7 @@ from defines.gameDefines import BoardConfig, OpponentType
 
 
 @dataclass
-class GameData:
+class GameConfig:
     opponentType: OpponentType = OpponentType.HUMAN
     numberColumns: int = BoardConfig.DEFAULT_NUMBER_COLUMNS
     numberLines: int = BoardConfig.DEFAULT_NUMBER_LINES

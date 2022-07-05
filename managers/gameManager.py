@@ -47,9 +47,10 @@ class GameManager(Thread):
             self._uiCommunicator.addPacket(gamePacket)
 
     def _startNewGame(self, packet: GamePacket):
-        gameData = packet.gameData
-        self._game = Connect4Game(gameData)
+        gameConfig = packet.gameConfig
+        self._game = Connect4Game(gameConfig)
         self._isGameStarted = True
+        self._isGameFinished = False
 
     def _addPlayerMove(self, packet: GamePacket):
         column = packet.playedColumn

@@ -1,14 +1,14 @@
 import numpy as np
-from gameData import GameData
+from gameConfig import GameConfig
 from defines.gameDefines import PlayerId
 
 
 class Connect4Game:
 
-    def __init__(self, gameData: GameData):
-        self.nb_of_column = gameData.numberColumns
-        self.nb_of_line = gameData.numberLines
-        self.numberPiecesToWin = gameData.numberPiecesToWin
+    def __init__(self, gameConfig: GameConfig):
+        self.nb_of_column = gameConfig.numberColumns
+        self.nb_of_line = gameConfig.numberLines
+        self.numberPiecesToWin = gameConfig.numberPiecesToWin
         self.player0board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.player1board = np.zeros((self.nb_of_line, self.nb_of_column))
         self.board = np.zeros((self.nb_of_line, self.nb_of_column))

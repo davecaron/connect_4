@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QCursor
 
-from logic.gameData import GameData
+from logic.gameConfig import GameConfig
 from defines.packetDefines import GamePacket
 from defines.gameDefines import PlayerId
 from defines.uiDefines import BoardDefines
@@ -11,12 +11,12 @@ from gui.columnWidget import ColumnWidget
 
 class BoardWidget(QWidget):
 
-    def __init__(self, gameData: GameData, playerMoveCallback):
+    def __init__(self, gameConfig: GameConfig, playerMoveCallback):
         super().__init__()
         self._winningPlayerId = PlayerId.NO_PLAYER
-        self._opponentType = gameData.opponentType
-        self._numberColumns = gameData.numberColumns
-        self._numberRow = gameData.numberLines
+        self._opponentType = gameConfig.opponentType
+        self._numberColumns = gameConfig.numberColumns
+        self._numberRow = gameConfig.numberLines
         self._playerMoveCallback = playerMoveCallback
         self._columnWidthPx = 0
         self._columnHeightPx = 0
