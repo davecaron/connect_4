@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QDialog
 from PyQt6.QtCore import QTimer
 
 from gui.playAgainWindow import PlayAgainWindow
-from gui.opponentsChoiceWidget import OpponentsChoiceWidget
+from gui.opponentsChoiceWindow import OpponentsChoiceWindow
 from gui.boardWidget import BoardWidget
 from controller.controllerABC import ControllerABC
 from factories.packetBuilder import PacketBuilder
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
     def __init__(self, controller: ControllerABC, packetBuilder: PacketBuilder):
         super().__init__()
         self._gameConfig = GameConfig()
-        self._opponentsWidget = None
+        self._opponentsWindow = None
         self._boardWidget: BoardWidget = None
         self._playAgainWindow = None
         self._isGameFinished = False
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
 
         self.__initTimer()
         self.__initWindow()
-        self.__addOpponentsChoiceWidget()
+        self.__addOpponentsChoiceWindow()
 
     def __initTimer(self):
         self._timer = QTimer()
@@ -44,11 +44,11 @@ class MainWindow(QMainWindow):
         nameAndVersion = getNameAndVersion()
         self.setWindowTitle(nameAndVersion)
 
-    def __addOpponentsChoiceWidget(self):
-        self._opponentsWidget = OpponentsChoiceWidget()
-        self._opponentsWidget.opponentTypeSignal.connect(self.receiveOpponentType)
-        self._opponentsWidget.closeRequestSignal.connect(self.receiveCloseRequest)
-        self.setCentralWidget(self._opponentsWidget)
+    def __addOpponentsChoiceWindow(self):
+        self._opponentsWindow = OpponentsChoiceWindow()
+        self._opponentsWindow.opponentTypeSignal.connect(self.receiveOpponentType)
+        self._opponentsWindow.closeRequestSignal.connect(self.receiveCloseRequest)
+        self.setCentralWidget(self._opponentsWindow)
 
     def __addBoardWidget(self):
         self._boardWidget = BoardWidget(self._gameConfig, self.sendPlayerMove)
@@ -63,8 +63,8 @@ class MainWindow(QMainWindow):
     def receiveOpponentType(self, opponentType: OpponentType):
         self._gameConfig.opponentType = OpponentType(opponentType)
 
-        self._opponentsWidget.close()
-        self._opponentsWidget.destroy()
+        self._opponentsWindow.close()
+        self._opponentsWindow.destroy()
 
         self.__addBoardWidget()
         self.__startNewGame()

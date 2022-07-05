@@ -5,7 +5,7 @@ from gui.guiCommon import setLabelFontSize, LabelAlignFlag
 from defines.gameDefines import OpponentType
 
 
-class OpponentsChoiceWidget(QWidget):
+class OpponentsChoiceWindow(QWidget):
 
     opponentTypeSignal = pyqtSignal(int)
     closeRequestSignal = pyqtSignal()
@@ -61,7 +61,3 @@ class OpponentsChoiceWidget(QWidget):
 
     def __sendCloseRequest(self):
         self.closeRequestSignal.emit()
-
-
-if __name__ == "__main__":
-    print("opponentsChoiceWidget")
