@@ -21,7 +21,8 @@ class OpponentsChoiceWidget(QWidget):
         self.__addOpponentsChoiceLabel()
         self.__addOpponentsButtons()
         self.__addQuitButtons()
-        self.__addElementsToWidget()
+        self.__setLayout()
+        self.__setSize()
 
     def __addOpponentsChoiceLabel(self):
         chooseOpponentLabel = QLabel("Choose Your Opponent")
@@ -49,8 +50,10 @@ class OpponentsChoiceWidget(QWidget):
 
         self.verticalLayout.addWidget(quitButton)
 
-    def __addElementsToWidget(self):
+    def __setLayout(self):
         self.setLayout(self.verticalLayout)
+
+    def __setSize(self):
         self.resize(self.DEFAULT_WIDTH_PX, self.DEFAULT_HEIGHT_PX)
 
     def __sendOpponentTypeSignal(self, opponentType: OpponentType):
