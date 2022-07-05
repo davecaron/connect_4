@@ -18,3 +18,9 @@ class TokenDefines:
     PLAYER2_COLOR = (235, 7, 7, 255)
     PLAYABLE_TOKEN_ALPHA = 160
     PLAYED_TOKEN_ALPHA = 255
+
+
+class PlayAgainWindow:
+    DEFAULT_TITLE = "Play Again"
+    DEFAULT_WIDTH_PX = 200
+    DEFAULT_HEIGHT_PX = 100
