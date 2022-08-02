@@ -6,11 +6,11 @@ VERSION_BUILD = 0
 
 
 def getVersion():
-    return str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_BUILD)
+    return f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_BUILD}"
 
 
 def getNameAndVersion():
-    return APPLICATION_NAME + " v." + getVersion()
+    return f"{APPLICATION_NAME} v.{getVersion()}"
 
 
 if __name__ == "__main__":
