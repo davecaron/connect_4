@@ -1,22 +1,43 @@
-import logic.connect_4 as con
-import UI_basic.connect_4_UI as conUI
+from queue import Queue
+from gui.mainWindow import MainWindow
+from PyQt6.QtWidgets import QApplication
+
+from managers.gameManager import GameManager
+from controller.gameController import GameController
+from factories.gamePacketBuilder import GamePacketBuilder
 
 
-if __name__ == '__main__':
-
+def main():
     print("Main Running")
 
-    gameUI = conUI.connect4UI(mode="human")
+    modelQueue = Queue()
+    uiQueue = Queue()
 
+    gamePacketBuilder = GamePacketBuilder()
+    gameManager = GameManager(modelQueue, uiQueue, gamePacketBuilder)
+    gameManager.start()
 
-    while True:
-        gameUI.update()
-        gameUI.check_event()
+    app = QApplication([])
 
+    gameController = GameController(modelQueue, uiQueue)
+    gamePacketBuilder = GamePacketBuilder()
 
+    mainWindow = MainWindow(gameController, gamePacketBuilder)
+    mainWindow.show()
 
+    gameController.start()
+    app.exec()
 
+    modelQueue.join()
+    uiQueue.join()
+
+    gameManager.stop()
+    gameManager.join()
+    gameController.stop()
+    gameController.join()
 
     print("Main Finished")
 
 
+if __name__ == '__main__':
+    main()
